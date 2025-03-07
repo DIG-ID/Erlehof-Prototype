@@ -1,0 +1,61 @@
+---
+import '/src/scripts/auth.js';
+import "/src/styles/global.css";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+---
+
+<form id="register-form" class="max-w-md mx-auto p-6 bg-white rounded-xl shadow-md space-y-6">
+  <h2 class="text-2xl font-bold text-center text-gray-800">Register</h2>
+
+  <!-- Email Input -->
+  <div class="space-y-2">
+    <Label htmlFor="email" className="text-lg text-gray-700">Email</Label>
+    <Input
+      id="email"
+      name="email"
+      type="email"
+      required
+      placeholder="Email"
+      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-indigo-500"
+    />
+  </div>
+
+  <!-- Password Input -->
+  <div class="space-y-2">
+    <Label htmlFor="password" className="text-lg text-gray-700">Password</Label>
+    <Input
+      id="password"
+      name="password"
+      type="password"
+      required
+      placeholder="Password"
+      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-indigo-500"
+    />
+  </div>
+
+  <!-- Submit Button -->
+  <div class="text-center">
+    <Button
+      type="submit"
+      className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition"
+    >
+      Register
+    </Button>
+  </div>
+
+  <p class="text-center text-sm text-gray-500">
+    Already have an account? 
+    <a href="/login" class="text-blue-500 hover:underline">Login</a>
+  </p>
+</form>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    import("../scripts/auth.js").then(({ registerUser }) => {
+      const form = document.getElementById("register-form");
+      form?.addEventListener("submit", registerUser);
+    });
+  });
+</script>
