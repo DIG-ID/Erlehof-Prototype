@@ -1,5 +1,5 @@
 ---
-import '/src/styles/global.css';
+import "/src/styles/global.css";
 ---
 
 <html lang="en">
@@ -12,19 +12,20 @@ import '/src/styles/global.css';
 <body class="bg-gray-100">
   <div class="flex h-screen">
     <!-- Sidebar -->
-    <div class="w-64 bg-indigo-600 text-white p-6">
+    <div class="side-bar w-64 bg-indigo-600 text-white p-6">
       <h2 class="text-xl font-semibold mb-8">Dashboard</h2>
       <ul class="space-y-4">
-        <li><a href="#profile" class="text-lg hover:text-indigo-200">Profile</a></li>
-        <li><a href="#user-list" class="text-lg hover:text-indigo-200" id="user-list-link">User List</a></li>
-        <li><a href="#jobs" class="text-lg hover:text-indigo-200">Jobs</a></li>
+        <li><a href="#profile" class="text-lg hover:text-indigo-200 sidebar-link" data-target="profile">Profile</a></li>
+        <li><a href="#user-list" class="text-lg hover:text-indigo-200 sidebar-link" data-target="user-list">User List</a></li>
+        <li><a href="#create-job" class="text-lg hover:text-indigo-200 sidebar-link" data-target="create-job">Create a new job</a></li>
+        <li><a href="#job-list" class="text-lg hover:text-indigo-200 sidebar-link" data-target="job-list">Jobs List</a></li>
       </ul>
     </div>
 
     <!-- Main Content -->
-    <div class="flex-1 p-6 overflow-y-auto">
+    <div class="main flex-1 p-6 overflow-y-auto">
       <!-- Profile Section -->
-      <div id="profile" class="space-y-6">
+      <div id="profile" class="space-y-6 section hidden">
         <h2 class="text-2xl font-bold mb-4">Profile</h2>
         <p id="user-info">Loading user info...</p>
         <button id="logout-btn" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">
@@ -33,13 +34,13 @@ import '/src/styles/global.css';
       </div>
 
       <!-- User List -->
-      <div id="user-list" class="space-y-6 mt-10">
+      <div id="user-list" class="space-y-6 mt-10 section hidden">
         <h2 class="text-2xl font-bold mb-4">User List</h2>
         <ul id="user-list-container"></ul>
       </div>
 
       <!-- Create Job Form -->
-      <div class="bg-white p-6 rounded-lg shadow-md mt-10">
+      <div id="create-job" class="bg-white p-6 rounded-lg shadow-md mt-10 section hidden">
         <h2 class="text-xl font-semibold mb-4">Create a Job</h2>
         <form id="job-form">
           <label class="block mb-2">Title:</label>
@@ -59,11 +60,37 @@ import '/src/styles/global.css';
         </form>
         <p id="job-message" class="text-green-600 mt-4 hidden"></p>
       </div>
+
+      <!-- Job List -->
+      <div id="job-list" class="space-y-6 mt-10 section hidden">
+        <h2 class="text-2xl font-bold mb-4">Job List</h2>
+        <ul id="job-list-container"></ul>
+      </div>
     </div>
   </div>
 
   <script type="module">
     import { supabase } from "/src/lib/supabase.js";
+
+    // Function to hide all sections and show the targeted one
+    function showSection(targetId) {
+        const sections = document.querySelectorAll('.section');
+        sections.forEach(section => section.classList.add('hidden')); // Hide all sections
+        const targetSection = document.getElementById(targetId);
+        if (targetSection) {
+            targetSection.classList.remove('hidden'); // Show the clicked section
+        }
+    }
+
+    // Event listener for sidebar links
+    const sidebarLinks = document.querySelectorAll('.sidebar-link');
+    sidebarLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault(); // Prevent default anchor behavior
+        const targetId = e.target.getAttribute('data-target');
+        showSection(targetId);
+      });
+    });
 
     async function fetchUsers() {
         try {
@@ -78,15 +105,11 @@ import '/src/styles/global.css';
             }
 
             const userListContainer = document.getElementById("user-list-container");
-            const assignUserSelect = document.getElementById("assign-user");
 
             if (data && Array.isArray(data)) {
+                // Display user information elsewhere on the page if needed
                 userListContainer.innerHTML = data
                     .map(user => `<li class="text-lg text-gray-800">ID: ${user.id}, Email: ${user.email} (Role: ${user.role_id})</li>`)
-                    .join("");
-
-                assignUserSelect.innerHTML = data
-                    .map(user => `<option value="${user.id}">${user.email}</option>`)
                     .join("");
             }
         } catch (err) {
@@ -116,10 +139,16 @@ import '/src/styles/global.css';
             } else {
                 document.getElementById("user-info").textContent = `Logged in as: ${user.email}`;
 
-                // Allow user list & job creation only for superadmins (role_id = 1)
-                if (userData?.role_id === 1) {
-                    fetchUsers();
+                // Show user list and job creation only for superadmins (role_id = 1) and admins (role_id = 2)
+                if (userData?.role_id === 1 || userData?.role_id === 2) {
+                    fetchUsers(); // Show the user list if superadmin or admin
+                    document.getElementById("user-list").classList.remove("hidden");
                 } else {
+                    document.getElementById("user-list").classList.add("hidden"); // Hide user list for non-admin users
+                }
+
+                // Allow job creation only for superadmins (role_id = 1)
+                if (userData?.role_id !== 1) {
                     document.getElementById("job-form").classList.add("hidden");
                 }
             }
@@ -128,15 +157,53 @@ import '/src/styles/global.css';
         }
     }
 
+    /*FETCH ROLES FUNCTION*/
+    async function loadRoles() {
+        try {
+            const { data: roles, error } = await supabase
+                .from('roles')
+                .select('id, role_name');
+            
+            if (error) {
+                console.error("Error loading roles:", error.message);
+                return;
+            }
 
+            const selectElement = document.getElementById("assign-user");
+
+            // Clear existing options
+            selectElement.innerHTML = '';
+
+            // Add default "Select a role" option (optional)
+            const defaultOption = document.createElement("option");
+            defaultOption.value = '';
+            defaultOption.textContent = 'Select a role';
+            selectElement.appendChild(defaultOption);
+
+            roles.forEach(role => {
+                const option = document.createElement("option");
+                option.value = role.id;
+                option.textContent = role.role_name;
+                selectElement.appendChild(option);
+            });
+        } catch (err) {
+            console.error("Error fetching roles:", err);
+        }
+        
+    }
+
+    loadRoles();
+
+
+    /*CREATE JOBS FUNCTION*/
     async function createJob(event) {
         event.preventDefault();
 
         const title = document.getElementById("job-title").value;
         const description = document.getElementById("job-description").value;
-        const assignedUser = document.getElementById("assign-user").value;
+        const assignedRole = document.getElementById("assign-user").value;
 
-        if (!title || !description || !assignedUser) {
+        if (!title || !description || !assignedRole) {
             alert("Please fill in all fields.");
             return;
         }
@@ -160,18 +227,17 @@ import '/src/styles/global.css';
                 return;
             }
 
+            // Insert the job, now assigning it to a role instead of a user
             const { data, error } = await supabase
                 .from("jobs")
-                .insert([
-                    {
-                        title: title,
-                        description: description,
-                        assigned_to: assignedUser,
-                        created_by: user.id,
-                        status: "open",
-                        created_at: new Date()
-                    }
-                ]);
+                .insert([{
+                    title: title,
+                    description: description,
+                    assigned_to: assignedRole,  // This is now the role ID
+                    created_by: user.id,
+                    status: "open",
+                    created_at: new Date()
+                }]);
 
             if (error) {
                 console.error("Error creating job:", error.message);
@@ -181,17 +247,15 @@ import '/src/styles/global.css';
             document.getElementById("job-message").textContent = "Job successfully created!";
             document.getElementById("job-message").classList.remove("hidden");
 
-            // Send a notification to the assigned user
+            // Send a notification to the assigned role (if necessary)
             await supabase
                 .from("notifications")
-                .insert([
-                    {
-                        user_id: assignedUser,
-                        message: `You have been assigned a new job: ${title}`,
-                        created_at: new Date(),
-                        read: false
-                    }
-                ]);
+                .insert([{
+                    role_id: assignedRole,  // You may need to adjust this if notifications are specific to users
+                    message: `A new job has been assigned to the ${assignedRole} role: ${title}`,
+                    created_at: new Date(),
+                    read: false
+                }]);
 
             setTimeout(() => {
                 document.getElementById("job-message").classList.add("hidden");
@@ -204,6 +268,35 @@ import '/src/styles/global.css';
     }
 
 
+    async function fetchJobs() {
+        try {
+            const { data, error } = await supabase
+                .from("jobs")
+                .select("title, description, status");
+
+            if (error) {
+                console.error("Error fetching jobs:", error.message);
+                return;
+            }
+
+            const jobListContainer = document.getElementById("job-list-container");
+
+            if (data && Array.isArray(data)) {
+                jobListContainer.innerHTML = data
+                    .map(job => `
+                        <li class="bg-white p-4 rounded-lg shadow-md mb-4">
+                            <h3 class="text-xl font-semibold">${job.title}</h3>
+                            <p class="text-gray-700">${job.description}</p>
+                            <p class="text-sm text-gray-500">Status: ${job.status}</p>
+                        </li>
+                    `)
+                    .join("");
+            }
+        } catch (err) {
+            console.error("Unexpected error fetching jobs:", err);
+        }
+    }
+
     async function logout() {
         await supabase.auth.signOut();
         window.location.href = "/login";
@@ -211,8 +304,12 @@ import '/src/styles/global.css';
 
     document.addEventListener("DOMContentLoaded", () => {
         fetchUser();
+        fetchJobs();
+        
         document.getElementById("logout-btn").addEventListener("click", logout);
         document.getElementById("job-form").addEventListener("submit", createJob);
+
+        showSection("profile");
     });
   </script>
 </body>

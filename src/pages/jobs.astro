@@ -1,0 +1,89 @@
+---
+import "/src/styles/global.css";
+import { supabase } from "../lib/supabase.js";
+
+// Define the type for a job object
+type Job = {
+  title: string;
+  description: string;
+  status: string;
+};
+
+// Fetch jobs from Supabase
+async function fetchJobs(): Promise<Job[]> {
+  const { data, error } = await supabase.from("jobs").select("title, description, status");
+
+  if (error) {
+    console.error("Error fetching jobs:", error.message);
+    return [];
+  }
+  return data;
+}
+
+const jobs = await fetchJobs();
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jobs List</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body class="font-sans bg-gray-100">
+  <!-- Navigation Bar -->
+  <nav class="bg-dark-blue py-4 text-white">
+    <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
+      <div class="text-xl font-bold">Admin Dashboard</div>
+      <div>
+        <a href="/dashboard" class="text-white px-4 py-2">Dashboard</a>
+        <a href="/jobs" class="text-white px-4 py-2">Jobs</a>
+        <button id="logout-btn" class="text-white px-4 py-2">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Page Content -->
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-semibold mb-6">Available Jobs</h1>
+
+    <!-- Job List -->
+    <div id="job-list" class="space-y-6">
+      <ul id="job-list-container">
+        <!-- Render jobs here dynamically -->
+        {jobs.length > 0 ? (
+          jobs.map((job: Job) => (
+            <li class="bg-white p-4 rounded-lg shadow-md mb-4" Astro.key={job.title}>
+              <h3 class="text-xl font-semibold">{job.title}</h3>
+              <p class="text-gray-700">{job.description}</p>
+              <p class="text-sm text-gray-500">Status: {job.status}</p>
+            </li>
+          ))
+        ) : (
+          <li class="bg-white p-4 rounded-lg shadow-md mb-4">
+            <p class="text-gray-700">No jobs available at the moment.</p>
+          </li>
+        )}
+      </ul>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-dark-blue text-white py-4 text-center">
+    <p>&copy; 2025 Your Company</p>
+  </footer>
+
+  <!-- Logout Script -->
+  <script type="module">
+    import { supabase } from "/src/lib/supabase.js";
+
+    async function logout() {
+      await supabase.auth.signOut();
+      window.location.href = "/login";
+    }
+
+    document.getElementById("logout-btn").addEventListener("click", logout);
+  </script>
+</body>
+</html>
