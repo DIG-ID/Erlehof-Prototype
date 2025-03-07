@@ -1,5 +1,5 @@
 ---
-import "/src/styles/global.css";
+import "../styles/global.css";
 import { supabase } from "../lib/supabase.js";
 
 // Define the type for a job object
@@ -76,7 +76,7 @@ const jobs = await fetchJobs();
 
   <!-- Logout Script -->
   <script type="module">
-    import { supabase } from "/src/lib/supabase.js";
+    import { supabase } from "../lib/supabase.js";
 
     async function logout() {
       await supabase.auth.signOut();

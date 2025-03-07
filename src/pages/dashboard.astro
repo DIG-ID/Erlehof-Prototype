@@ -1,5 +1,5 @@
 ---
-import "/src/styles/global.css";
+import "../styles/global.css";
 ---
 
 <html lang="en">
@@ -7,7 +7,7 @@ import "/src/styles/global.css";
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard</title>
-  <link rel="stylesheet" href="/src/styles/global.css">
+  <link rel="stylesheet" href="../styles/global.css">
 </head>
 <body class="bg-gray-100">
   <div class="flex h-screen">
@@ -70,7 +70,7 @@ import "/src/styles/global.css";
   </div>
 
   <script type="module">
-    import { supabase } from "/src/lib/supabase.js";
+    import { supabase } from "../lib/supabase.js";
 
     // Function to hide all sections and show the targeted one
     function showSection(targetId) {
