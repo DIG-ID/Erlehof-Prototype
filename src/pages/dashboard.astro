@@ -1,75 +1,8 @@
 ---
 import "../styles/global.css";
 ---
-
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard</title>
-</head>
-<body class="bg-gray-100">
-  <div class="flex h-screen">
-    <!-- Sidebar -->
-    <div class="side-bar w-64 bg-indigo-600 text-white p-6">
-      <h2 class="text-xl font-semibold mb-8">Dashboard</h2>
-      <ul class="space-y-4">
-        <li><a href="#profile" class="text-lg hover:text-indigo-200 sidebar-link" data-target="profile">Profile</a></li>
-        <li><a href="#user-list" class="text-lg hover:text-indigo-200 sidebar-link" data-target="user-list">User List</a></li>
-        <li><a href="#create-job" class="text-lg hover:text-indigo-200 sidebar-link" data-target="create-job">Create a new job</a></li>
-        <li><a href="#job-list" class="text-lg hover:text-indigo-200 sidebar-link" data-target="job-list">Jobs List</a></li>
-      </ul>
-    </div>
-
-    <!-- Main Content -->
-    <div class="main flex-1 p-6 overflow-y-auto">
-      <!-- Profile Section -->
-      <div id="profile" class="space-y-6 section hidden">
-        <h2 class="text-2xl font-bold mb-4">Profile</h2>
-        <p id="user-info">Loading user info...</p>
-        <button id="logout-btn" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">
-          Logout
-        </button>
-      </div>
-
-      <!-- User List -->
-      <div id="user-list" class="space-y-6 mt-10 section hidden">
-        <h2 class="text-2xl font-bold mb-4">User List</h2>
-        <ul id="user-list-container"></ul>
-      </div>
-
-      <!-- Create Job Form -->
-      <div id="create-job" class="bg-white p-6 rounded-lg shadow-md mt-10 section hidden">
-        <h2 class="text-xl font-semibold mb-4">Create a Job</h2>
-        <form id="job-form">
-          <label class="block mb-2">Title:</label>
-          <input type="text" id="job-title" class="w-full p-2 border rounded mb-4" required>
-      
-          <label class="block mb-2">Description:</label>
-          <textarea id="job-description" class="w-full p-2 border rounded mb-4" required></textarea>
-      
-          <label class="block mb-2">Assign To:</label>
-          <select id="assign-user" class="w-full p-2 border rounded mb-4">
-            <!-- Options will be dynamically loaded -->
-          </select>
-      
-          <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
-            Create Job
-          </button>
-        </form>
-        <p id="job-message" class="text-green-600 mt-4 hidden"></p>
-      </div>
-
-      <!-- Job List -->
-      <div id="job-list" class="space-y-6 mt-10 section hidden">
-        <h2 class="text-2xl font-bold mb-4">Job List</h2>
-        <ul id="job-list-container"></ul>
-      </div>
-    </div>
-  </div>
-
-  <script type="module">
-    import { supabase } from '../src/lib/supabase.js';
+<script type="module">
+    import { supabase } from '/src/lib/supabase.js';
 
     // Function to hide all sections and show the targeted one
     function showSection(targetId) {
@@ -191,8 +124,6 @@ import "../styles/global.css";
         
     }
 
-    loadRoles();
-
 
     /*CREATE JOBS FUNCTION*/
     async function createJob(event) {
@@ -304,12 +235,79 @@ import "../styles/global.css";
     document.addEventListener("DOMContentLoaded", () => {
         fetchUser();
         fetchJobs();
-        
+        loadRoles();
         document.getElementById("logout-btn").addEventListener("click", logout);
         document.getElementById("job-form").addEventListener("submit", createJob);
 
         showSection("profile");
     });
   </script>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+</head>
+<body class="bg-gray-100">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <div class="side-bar w-64 bg-indigo-600 text-white p-6">
+      <h2 class="text-xl font-semibold mb-8">Dashboard</h2>
+      <ul class="space-y-4">
+        <li><a href="#profile" class="text-lg hover:text-indigo-200 sidebar-link" data-target="profile">Profile</a></li>
+        <li><a href="#user-list" class="text-lg hover:text-indigo-200 sidebar-link" data-target="user-list">User List</a></li>
+        <li><a href="#create-job" class="text-lg hover:text-indigo-200 sidebar-link" data-target="create-job">Create a new job</a></li>
+        <li><a href="#job-list" class="text-lg hover:text-indigo-200 sidebar-link" data-target="job-list">Jobs List</a></li>
+      </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main flex-1 p-6 overflow-y-auto">
+      <!-- Profile Section -->
+      <div id="profile" class="space-y-6 section hidden">
+        <h2 class="text-2xl font-bold mb-4">Profile</h2>
+        <p id="user-info">Loading user info...</p>
+        <button id="logout-btn" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">
+          Logout
+        </button>
+      </div>
+
+      <!-- User List -->
+      <div id="user-list" class="space-y-6 mt-10 section hidden">
+        <h2 class="text-2xl font-bold mb-4">User List</h2>
+        <ul id="user-list-container"></ul>
+      </div>
+
+      <!-- Create Job Form -->
+      <div id="create-job" class="bg-white p-6 rounded-lg shadow-md mt-10 section hidden">
+        <h2 class="text-xl font-semibold mb-4">Create a Job</h2>
+        <form id="job-form">
+          <label class="block mb-2">Title:</label>
+          <input type="text" id="job-title" class="w-full p-2 border rounded mb-4" required>
+      
+          <label class="block mb-2">Description:</label>
+          <textarea id="job-description" class="w-full p-2 border rounded mb-4" required></textarea>
+      
+          <label class="block mb-2">Assign To:</label>
+          <select id="assign-user" class="w-full p-2 border rounded mb-4">
+            <!-- Options will be dynamically loaded -->
+          </select>
+      
+          <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
+            Create Job
+          </button>
+        </form>
+        <p id="job-message" class="text-green-600 mt-4 hidden"></p>
+      </div>
+
+      <!-- Job List -->
+      <div id="job-list" class="space-y-6 mt-10 section hidden">
+        <h2 class="text-2xl font-bold mb-4">Job List</h2>
+        <ul id="job-list-container"></ul>
+      </div>
+    </div>
+  </div>
+
+  
 </body>
 </html>
