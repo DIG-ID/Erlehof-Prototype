@@ -306,8 +306,11 @@ export function initDashboard() {
             // Job notification message, only for non-superadmin/admin users
             const jobNotification = document.getElementById("job-notification");
             if (userData.role_id !== 1 && userData.role_id !== 2) {
-                if (data && data.length > 0) {
-                    jobNotification.innerHTML = `✅ You have ${data.length} open job(s) assigned to your role.`;
+                // Filter the jobs to include only those with status "open"
+                const openJobs = data.filter(job => job.status === "open");
+
+                if (openJobs.length > 0) {
+                    jobNotification.innerHTML = `✅ You have ${openJobs.length} open job(s) assigned to your role.`;
                     jobNotification.classList.remove("hidden");
                     jobNotification.classList.add("bg-green-100", "text-green-700", "p-3", "rounded");
                 } else {
@@ -318,6 +321,7 @@ export function initDashboard() {
             } else {
                 jobNotification.classList.add("hidden");
             }
+
     
         } catch (err) {
             console.error("Error fetching jobs:", err);
