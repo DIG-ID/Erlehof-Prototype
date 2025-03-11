@@ -1,6 +1,14 @@
 // @ts-nocheck
 import { supabase } from '../lib/supabase.js';
 
+export async function checkIfLoggedIn() {
+  const { data } = await supabase.auth.getSession();
+
+  if (data.session) {
+    window.location.href = "/dashboard"; // Redirect logged-in users
+  }
+}
+
 // Helper function to assign the default role 'user-level-1' on registration
 async function assignDefaultRole(userId) {
   const { data, error } = await supabase
@@ -56,6 +64,14 @@ export async function registerUser(event) {
   }
 }
 
+// Listen for auth state changes (runs when a user logs in or out)
+supabase.auth.onAuthStateChange((event, session) => {
+  console.log("Auth state changed:", event, session);
+  if (session) {
+    window.location.href = "/dashboard"; // Redirect only when a session exists
+  }
+});
+
 export async function loginUser(event) {
   event.preventDefault();
 
@@ -99,7 +115,8 @@ export async function loginUser(event) {
     }
 
     alert("Login successful!");
-    window.location.href = "/dashboard"; // Redirect to dashboard
+
+    // Remove direct redirection here, let `onAuthStateChange` handle it
   } catch (err) {
     console.error("Unexpected error:", err);
   }

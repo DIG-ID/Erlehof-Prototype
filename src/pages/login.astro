@@ -4,6 +4,11 @@ import "../styles/global.css";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
+import { checkIfLoggedIn } from "../scripts/auth.js";
+
+// Redirect if user is already logged in
+await checkIfLoggedIn();
 ---
 
 <form id="login-form" class="max-w-md mx-auto p-6 bg-white rounded-xl shadow-md space-y-6">
