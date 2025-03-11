@@ -281,13 +281,15 @@ export function initDashboard() {
                                     >
                                         ❌ 
                                     </button>
-                                    ${job.status === "open" && allowedRoles.includes(userData.role_id) 
-                                        ? `<button 
-                                                class="acceptButton bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 hover:cursor-pointer"
-                                                data-job-id="${job.id}"
-                                            >
-                                                Accept
-                                            </button>` 
+                                    ${job.status === "open"
+                                        ? (allowedRoles.includes(userData.role_id)
+                                            ? `<button 
+                                                    class="acceptButton bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 hover:cursor-pointer"
+                                                    data-job-id="${job.id}"
+                                                >
+                                                    Accept
+                                                </button>` 
+                                            : `<span class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:cursor-default">Open</span>`)
                                         : `<span class="bg-red-500 text-white px-4 py-2 rounded-lg hover:cursor-default">Assigned</span>`
                                     }
                                 </div>
