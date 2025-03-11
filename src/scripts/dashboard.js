@@ -208,7 +208,7 @@ export function initDashboard() {
         try {
             const { error } = await supabase
                 .from("jobs")
-                .update({ status: "closed" })
+                .update({ status: "assigned" })
                 .eq("id", jobId);
     
             if (error) {
@@ -261,6 +261,9 @@ export function initDashboard() {
     
             const jobListContainer = document.getElementById("job-list-container");
     
+            // Define which roles are allowed to accept jobs
+            const allowedRoles = [3, 4]; // Example roles that can accept jobs
+    
             // Display jobs in the list
             if (data && Array.isArray(data)) {
                 jobListContainer.innerHTML = data
@@ -273,19 +276,19 @@ export function initDashboard() {
                                 </div>
                                 <div class="flex space-x-2">
                                     <button 
-                                        class="text-red-500 hover:text-red-700"
+                                        class="removeButton text-red-500 hover:text-red-700 hover:cursor-pointer"
                                         data-job-id="${job.id}"
                                     >
-                                        ❌ Remove
+                                        ❌ 
                                     </button>
-                                    ${job.status === "open" 
+                                    ${job.status === "open" && allowedRoles.includes(userData.role_id) 
                                         ? `<button 
-                                                class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+                                                class="acceptButton bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 hover:cursor-pointer"
                                                 data-job-id="${job.id}"
                                             >
                                                 Accept
                                             </button>` 
-                                        : `<span class="text-gray-500">Closed</span>`
+                                        : `<span class="bg-red-500 text-white px-4 py-2 rounded-lg hover:cursor-default">Assigned</span>`
                                     }
                                 </div>
                             </li>
@@ -295,11 +298,19 @@ export function initDashboard() {
             }
     
             // Add event listeners for the accept buttons dynamically
-            const acceptButtons = jobListContainer.querySelectorAll('button[data-job-id]');
+            const acceptButtons = jobListContainer.querySelectorAll('button.acceptButton');
             acceptButtons.forEach(button => {
                 button.addEventListener("click", function() {
                     const jobId = button.getAttribute('data-job-id');
                     acceptJob(jobId); // Pass the job ID to the acceptJob function
+                });
+            });
+    
+            const removeButtons = jobListContainer.querySelectorAll('button.removeButton'); 
+            removeButtons.forEach(button => {
+                button.addEventListener("click", function() {
+                    const jobId = button.getAttribute('data-job-id');
+                    removeJob(jobId); // Call the removeJob function
                 });
             });
     
@@ -308,7 +319,7 @@ export function initDashboard() {
             if (userData.role_id !== 1 && userData.role_id !== 2) {
                 // Filter the jobs to include only those with status "open"
                 const openJobs = data.filter(job => job.status === "open");
-
+    
                 if (openJobs.length > 0) {
                     jobNotification.innerHTML = `✅ You have ${openJobs.length} open job(s) assigned to your role.`;
                     jobNotification.classList.remove("hidden");
@@ -321,12 +332,12 @@ export function initDashboard() {
             } else {
                 jobNotification.classList.add("hidden");
             }
-
     
         } catch (err) {
             console.error("Error fetching jobs:", err);
         }
     }
+    
 
 
     // Logout function

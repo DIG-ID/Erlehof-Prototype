@@ -5,5 +5,5 @@ export default defineConfig({
     alias: {
       '@lib': '/src/lib/',
     }
-  }
+  },
 });

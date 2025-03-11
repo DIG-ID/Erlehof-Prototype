@@ -5,7 +5,9 @@ module.exports = {
     ],
     plugins: [
       require('tailwindcss-animate'), // Add TailwindCSS Animate plugin
-      // Add other plugins if needed
+      function ({ addVariant }) {
+        addVariant('dark', ['.dark &']);
+      },
     ],
     darkMode: 'class', // Or 'media' depending on how you want dark mode to be handled
     theme: {
