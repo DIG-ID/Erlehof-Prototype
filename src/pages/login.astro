@@ -14,15 +14,15 @@ await checkIfLoggedIn();
 <form id="login-form" class="max-w-md mx-auto p-6 bg-white rounded-xl shadow-md space-y-6">
   <h2 class="text-2xl font-bold text-center text-gray-800">Login</h2>
 
-  <!-- Email Input -->
+  <!-- Identifier (Email or Username) -->
   <div class="space-y-2">
-    <Label htmlFor="email" className="text-lg text-gray-700">Email</Label>
+    <Label htmlFor="identifier" className="text-lg text-gray-700">Email or Username</Label>
     <Input
-      id="email"
-      name="email"
-      type="email"
+      id="identifier"
+      name="identifier"
+      type="text"
       required
-      placeholder="Email"
+      placeholder="Enter your email or username"
       className="w-full p-3 border rounded-md focus:ring-2 focus:ring-indigo-500"
     />
   </div>
@@ -35,7 +35,7 @@ await checkIfLoggedIn();
       name="password"
       type="password"
       required
-      placeholder="Password"
+      placeholder="Enter your password"
       className="w-full p-3 border rounded-md focus:ring-2 focus:ring-indigo-500"
     />
   </div>

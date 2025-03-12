@@ -52,16 +52,19 @@ export function initDashboard() {
                 // Show or hide menu items based on role
                 const userListLink = document.querySelector('a[data-target="user-list"]');
                 const createJobLink = document.querySelector('a[data-target="create-job"]');
+                const jobSettingsLink = document.querySelector('a[data-target="job-settings"]');
 
                 // Show user list and job creation only for superadmins (role_id = 1) and admins (role_id = 2)
                 if (userData?.role_id === 1 || userData?.role_id === 2) {
                     userListLink.closest("li").classList.remove("hidden"); // Show User List
                     createJobLink.closest("li").classList.remove("hidden"); // Show Create Job
+                    jobSettingsLink.closest("li").classList.remove("hidden");
                     fetchUsers(); // Show the user list if superadmin or admin
                     document.getElementById("user-list").classList.remove("hidden");
                 } else {
                     userListLink.closest("li").classList.add("hidden"); // Hide User List
                     createJobLink.closest("li").classList.add("hidden"); // Hide Create Job
+                    jobSettingsLink.closest("li").classList.add("hidden");
                     document.getElementById("user-list").classList.add("hidden"); // Hide user list for non-admin users
                 }
 

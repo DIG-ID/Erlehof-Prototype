@@ -30,10 +30,21 @@ export async function registerUser(event) {
   const form = event.target;
   const email = form.email.value;
   const password = form.password.value;
+  const displayName = form.display_name.value; // New field
+  const phone = form.phone.value; // New field
 
   try {
-    // Sign up the user in Supabase Auth
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    // Sign up the user in Supabase Auth and store metadata
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          display_name: displayName,
+          phone: phone
+        }
+      }
+    });
 
     if (error) {
       console.error("Registration Error:", error.message);
@@ -46,7 +57,12 @@ export async function registerUser(event) {
     // Insert user into "users" table (if signup was successful)
     if (data.user) {
       const { error: dbError } = await supabase.from("users").insert([
-        { id: data.user.id, email: data.user.email }
+        {
+          id: data.user.id,
+          email: data.user.email,
+          username: displayName, // Assuming 'username' is the field in your 'users' table
+          phone: phone
+        }
       ]);
 
       if (dbError) {
@@ -64,6 +80,7 @@ export async function registerUser(event) {
   }
 }
 
+
 // Listen for auth state changes (runs when a user logs in or out)
 supabase.auth.onAuthStateChange((event, session) => {
   console.log("Auth state changed:", event, session);
@@ -76,11 +93,30 @@ export async function loginUser(event) {
   event.preventDefault();
 
   const form = event.target;
-  const email = form.email.value;
+  const identifier = form.identifier.value; // Could be email or username
   const password = form.password.value;
 
   try {
-    // Sign in the user
+    let email = identifier;
+
+    // If the input is NOT an email, assume it's a username and fetch the email
+    if (!identifier.includes("@")) {
+      const { data: userData, error: userError } = await supabase
+        .from("users")
+        .select("email")
+        .eq("username", identifier)
+        .single(); // Expecting only one result
+
+      if (userError || !userData) {
+        console.error("User not found:", userError?.message);
+        alert("Invalid username or email");
+        return;
+      }
+
+      email = userData.email; // Use the fetched email
+    }
+
+    // Proceed with login using the email
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
 
     if (authError) {
@@ -91,36 +127,31 @@ export async function loginUser(event) {
 
     console.log("User logged in:", authData.user);
 
-    // Fetch user info from "users" table
-    const { data: userData, error: userError } = await supabase
+    // Fetch user profile
+    const { data: userProfile, error: profileError } = await supabase
       .from("users")
       .select("id, email, full_name, role_id")
       .eq("id", authData.user.id)
-      .single(); // Expecting only one user
+      .single();
 
-    if (userError) {
-      console.error("Error fetching user profile:", userError.message);
+    if (profileError) {
+      console.error("Error fetching user profile:", profileError.message);
     } else {
-      console.log("User profile:", userData);
+      console.log("User profile:", userProfile);
 
-      // (Optional) Store user info and role in localStorage
-      localStorage.setItem("user", JSON.stringify(userData));
+      // Store user info in localStorage
+      localStorage.setItem("user", JSON.stringify(userProfile));
 
-      // If role is 'admin' or 'superadmin', show user list
-      if (userData.role_id === 1 || userData.role_id === 2) {
-        localStorage.setItem("canViewUserList", "true");
-      } else {
-        localStorage.setItem("canViewUserList", "false");
-      }
+      // Set role-based access
+      localStorage.setItem("canViewUserList", userProfile.role_id === 1 || userProfile.role_id === 2 ? "true" : "false");
     }
 
     alert("Login successful!");
-
-    // Remove direct redirection here, let `onAuthStateChange` handle it
   } catch (err) {
     console.error("Unexpected error:", err);
   }
 }
+
 
 export async function fetchUsers() {
   try {
