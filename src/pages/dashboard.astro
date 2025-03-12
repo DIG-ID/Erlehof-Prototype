@@ -53,6 +53,8 @@ document.addEventListener("DOMContentLoaded", () => {
         <li><a href="#user-list" class="text-lg hover:text-indigo-200 sidebar-link" data-target="user-list">User List</a></li>
         <li><a href="#create-job" class="text-lg hover:text-indigo-200 sidebar-link" data-target="create-job">Create a new job</a></li>
         <li><a href="#job-list" class="text-lg hover:text-indigo-200 sidebar-link" data-target="job-list">Jobs List</a></li>
+        <li><a href="#job-settings" class="text-lg hover:text-indigo-200 sidebar-link" data-target="job-settings">Job Settings</a></li>
+
       </ul>
     </div>
 
@@ -103,6 +105,28 @@ document.addEventListener("DOMContentLoaded", () => {
         <h2 class="text-2xl font-bold mb-4">Job List</h2>
         <ul id="job-list-container"></ul>
       </div>
+
+      <!-- Job Settings Section -->
+      <div id="job-settings" class="space-y-6 mt-10 section hidden">
+        <h2 class="text-2xl font-bold mb-4">Job Settings</h2>
+        <table id="job-settings-table" class="min-w-full table-auto border-collapse">
+          <thead>
+            <tr>
+              <th class="border p-2">Title</th>
+              <th class="border p-2">Description</th>
+              <th class="border p-2">Status</th>
+              <th class="border p-2">Assigned to</th>
+              <th class="border p-2">Created At</th>
+              <th class="border p-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Job rows will be inserted here dynamically -->
+          </tbody>
+        </table>
+      </div>
+      
+
     </div>
   </div>
 

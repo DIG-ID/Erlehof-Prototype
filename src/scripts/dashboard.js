@@ -340,7 +340,88 @@ export function initDashboard() {
         }
     }
     
-
+    async function fetchJobSettings() {
+        try {
+          const { data, error } = await supabase
+            .from('jobs')
+            .select('id, title, description, status, created_at, roles:assigned_to(role_name)'); // Fetch related role_name
+      
+          if (error) {
+            console.error('Error fetching job data:', error);
+            return;
+          }
+      
+          const tableBody = document.querySelector('#job-settings-table tbody');
+          tableBody.innerHTML = ''; // Clear existing rows
+      
+          data.forEach(job => {
+            const row = document.createElement('tr');
+      
+            row.innerHTML = `
+              <td class="border p-2">${job.title}</td>
+              <td class="border p-2">${job.description}</td>
+              <td class="border p-2">${job.status}</td>
+              <td class="border p-2">${job.roles ? job.roles.role_name : 'Unassigned'}</td>
+              <td class="border p-2">${new Date(job.created_at).toLocaleString()}</td>
+              <td class="border p-2">
+                <button class="edit-btn bg-blue-500 text-white px-2 py-1 rounded" data-id="${job.id}">Edit</button>
+                <button class="delete-btn bg-red-500 text-white px-2 py-1 rounded ml-2" data-id="${job.id}">Delete</button>
+              </td>
+            `;
+      
+            tableBody.appendChild(row);
+          });
+      
+          // Attach event listeners for edit and delete buttons
+          document.querySelectorAll('.edit-btn').forEach(button => {
+            button.addEventListener('click', (event) => {
+              const jobId = event.target.dataset.id;
+              editJob(jobId);
+            });
+          });
+      
+          document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', async (event) => {
+              const jobId = event.target.dataset.id;
+              await deleteJob(jobId);
+            });
+          });
+      
+        } catch (error) {
+          console.error('Error fetching job data:', error);
+        }
+    }
+      
+      
+    // Function to handle edit action
+    function editJob(jobId) {
+    alert(`Edit job with ID: ${jobId}`); 
+    // Implement modal or form for editing
+    }
+      
+    // Function to handle delete action
+    async function deleteJob(jobId) {
+    if (!confirm('Are you sure you want to delete this job?')) return;
+    
+    const { error } = await supabase
+        .from('jobs')
+        .delete()
+        .eq('id', jobId);
+    
+    if (error) {
+        console.error('Error deleting job:', error);
+        return;
+    }
+    
+    // Refresh the table
+    fetchJobSettings();
+    }
+    
+    // Call the fetch function when the page loads
+    document.addEventListener('DOMContentLoaded', () => {
+    fetchJobSettings();
+    });
+      
 
     // Logout function
     async function logout() {
@@ -351,6 +432,7 @@ export function initDashboard() {
     // Initialize the dashboard
     fetchUser();
     loadRoles();
+    fetchJobSettings();
 
     // Set up event listeners
     document.getElementById("logout-btn").addEventListener("click", logout);
