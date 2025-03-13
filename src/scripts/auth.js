@@ -168,3 +168,30 @@ export async function fetchUsers() {
     console.error("Unexpected error:", err);
   }
 }
+
+export async function resetPassword(event) {
+  event.preventDefault();
+
+  const form = event.target;
+  const email = form.email.value;
+
+  if (!email) {
+    alert("Please enter your email.");
+    return;
+  }
+
+  try {
+    const { error } = await supabase.auth.resetPasswordForEmail(email);
+
+    if (error) {
+      console.error("Reset Error:", error.message);
+      alert(error.message);
+      return;
+    }
+
+    alert("A password reset link has been sent to your email.");
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    alert("Something went wrong. Please try again.");
+  }
+}

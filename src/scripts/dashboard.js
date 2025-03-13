@@ -209,9 +209,21 @@ export function initDashboard() {
 
     async function acceptJob(jobId) {
         try {
+            // Fetch the logged-in user
+            const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+            if (authError || !user) {
+                console.error("User not authenticated:", authError?.message);
+                return;
+            }
+    
+            // Update the job with status "assigned" and set accepted_by to the user's ID
             const { error } = await supabase
                 .from("jobs")
-                .update({ status: "assigned" })
+                .update({
+                    status: "assigned",
+                    accepted_by: user.id, // Assign the job to the current user
+                })
                 .eq("id", jobId);
     
             if (error) {
@@ -225,6 +237,7 @@ export function initDashboard() {
             console.error("Error accepting job:", err);
         }
     }
+    
 
     // Fetch jobs and display notification if any open jobs are assigned to the user's role
     async function fetchJobs(roleId) {
@@ -345,55 +358,71 @@ export function initDashboard() {
     
     async function fetchJobSettings() {
         try {
-          const { data, error } = await supabase
-            .from('jobs')
-            .select('id, title, description, status, created_at, roles:assigned_to(role_name)'); // Fetch related role_name
-      
-          if (error) {
-            console.error('Error fetching job data:', error);
-            return;
-          }
-      
-          const tableBody = document.querySelector('#job-settings-table tbody');
-          tableBody.innerHTML = ''; // Clear existing rows
-      
-          data.forEach(job => {
-            const row = document.createElement('tr');
-      
-            row.innerHTML = `
-              <td class="border p-2">${job.title}</td>
-              <td class="border p-2">${job.description}</td>
-              <td class="border p-2">${job.status}</td>
-              <td class="border p-2">${job.roles ? job.roles.role_name : 'Unassigned'}</td>
-              <td class="border p-2">${new Date(job.created_at).toLocaleString()}</td>
-              <td class="border p-2">
-                <button class="edit-btn bg-blue-500 text-white px-2 py-1 rounded" data-id="${job.id}">Edit</button>
-                <button class="delete-btn bg-red-500 text-white px-2 py-1 rounded ml-2" data-id="${job.id}">Delete</button>
-              </td>
-            `;
-      
-            tableBody.appendChild(row);
-          });
-      
-          // Attach event listeners for edit and delete buttons
-          document.querySelectorAll('.edit-btn').forEach(button => {
-            button.addEventListener('click', (event) => {
-              const jobId = event.target.dataset.id;
-              editJob(jobId);
+            const { data, error } = await supabase
+                .from('jobs')
+                .select(`
+                    id, 
+                    title, 
+                    description, 
+                    status, 
+                    created_at, 
+                    roles:assigned_to(role_name),
+                    accepted_by(id, username, email)
+                `)
+                .order('created_at', { ascending: true }); // Order by created_at (oldest first)
+    
+            if (error) {
+                console.error('Error fetching job data:', error);
+                return;
+            }
+    
+            const tableBody = document.querySelector('#job-settings-table tbody');
+            tableBody.innerHTML = ''; // Clear existing rows
+    
+            data.forEach(job => {
+                const acceptedUser = job.accepted_by 
+                    ? `${job.accepted_by.username} (${job.accepted_by.email})`
+                    : 'Unassigned';
+    
+                const row = document.createElement('tr');
+    
+                row.innerHTML = `
+                    <td class="border p-2">${job.title}</td>
+                    <td class="border p-2">${job.description}</td>
+                    <td class="border p-2">${job.status}</td>
+                    <td class="border p-2">${job.roles ? job.roles.role_name : 'Unassigned'}</td>
+                    <td class="border p-2">${acceptedUser}</td>
+                    <td class="border p-2">${new Date(job.created_at).toLocaleString()}</td>
+                    <td class="border p-2">
+                        <button class="edit-btn bg-blue-500 text-white px-2 py-1 rounded" data-id="${job.id}">Edit</button>
+                        <button class="delete-btn bg-red-500 text-white px-2 py-1 rounded ml-2" data-id="${job.id}">Delete</button>
+                    </td>
+                `;
+    
+                tableBody.appendChild(row);
             });
-          });
-      
-          document.querySelectorAll('.delete-btn').forEach(button => {
-            button.addEventListener('click', async (event) => {
-              const jobId = event.target.dataset.id;
-              await deleteJob(jobId);
+    
+            // Attach event listeners for edit and delete buttons
+            document.querySelectorAll('.edit-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const jobId = event.target.dataset.id;
+                    editJob(jobId);
+                });
             });
-          });
-      
+    
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', async (event) => {
+                    const jobId = event.target.dataset.id;
+                    await deleteJob(jobId);
+                });
+            });
+    
         } catch (error) {
-          console.error('Error fetching job data:', error);
+            console.error('Error fetching job data:', error);
         }
     }
+    
+    
       
       
     // Function to handle edit action
