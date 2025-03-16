@@ -1,6 +1,6 @@
 ---
 import "../styles/global.css";
-
+import { Button } from "@/components/ui/button";
 ---
 <script>
 import { initDashboard } from '../scripts/dashboard.js';
@@ -44,16 +44,26 @@ document.addEventListener("DOMContentLoaded", () => {
   <title>Dashboard</title>
 </head>
 <body class="bg-gray-100">
+  <!-- Topbar -->
+  <div class="top-bar w-full bg-white px-6 py-4 flex justify-between items-center border-b border-[#252525]">
+    <img src="../../assets/images/logo.svg" alt="Astro Logo" class="w-48">
+    <p class="user-info">Loading user info...</p>
+    <Button id="logout-btn" className="bg-[#006f9a] text-white px-4 py-2 rounded-lg hover:cursor-pointer transition">
+      Logout
+    </Button>
+  </div>
   <div class="flex h-screen">
+    
     <!-- Sidebar -->
-    <div class="side-bar w-64 bg-indigo-600 text-white p-6">
+    <div class="side-bar w-64 bg-[#252525] text-white p-6 border-r border-[#252525]">
+      
       <h2 class="text-xl font-semibold mb-8">Dashboard</h2>
       <ul class="space-y-4">
-        <li><a href="#profile" class="text-lg hover:text-indigo-200 sidebar-link" data-target="profile">Profile</a></li>
-        <li><a href="#user-list" class="text-lg hover:text-indigo-200 sidebar-link" data-target="user-list">User List</a></li>
-        <li><a href="#create-job" class="text-lg hover:text-indigo-200 sidebar-link" data-target="create-job">Create a new job</a></li>
-        <li><a href="#job-list" class="text-lg hover:text-indigo-200 sidebar-link" data-target="job-list">Jobs List</a></li>
-        <li><a href="#job-settings" class="text-lg hover:text-indigo-200 sidebar-link" data-target="job-settings">Job Settings</a></li>
+        <li><a href="#profile" class="text-lg hover:text-[#006f9a] sidebar-link" data-target="profile">Profile</a></li>
+        <li><a href="#user-list" class="text-lg hover:text-[#006f9a] sidebar-link" data-target="user-list">User List</a></li>
+        <li><a href="#create-job" class="text-lg hover:text-[#006f9a] sidebar-link" data-target="create-job">Create a new job</a></li>
+        <li><a href="#job-list" class="text-lg hover:text-[#006f9a] sidebar-link" data-target="job-list">Jobs List</a></li>
+        <li><a href="#job-settings" class="text-lg hover:text-[#006f9a] sidebar-link" data-target="job-settings">Job Settings</a></li>
 
       </ul>
     </div>
@@ -63,10 +73,10 @@ document.addEventListener("DOMContentLoaded", () => {
       <!-- Profile Section -->
       <div id="profile" class="space-y-6 section hidden">
         <h2 class="text-2xl font-bold mb-4">Profile</h2>
-        <p id="user-info">Loading user info...</p>
-        <button id="logout-btn" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">
+        <p class="user-info">Loading user info...</p>
+        <Button id="logout-btn" className="bg-[#006f9a] text-white px-4 py-2 rounded-lg hover:cursor-pointer transition">
           Logout
-        </button>
+        </Button>
 
         <!-- Job Notification -->
         <div id="job-notification" class="hidden p-3 rounded mb-4"></div>
@@ -79,7 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
 
       <!-- Create Job Form -->
-      <div id="create-job" class="bg-white p-6 rounded-lg shadow-md mt-10 section hidden">
+      <div id="create-job" class="bg-white p-6 rounded-lg shadow-md section hidden">
         <h2 class="text-xl font-semibold mb-4">Create a Job</h2>
         <form id="job-form">
           <label class="block mb-2">Title:</label>
@@ -93,21 +103,21 @@ document.addEventListener("DOMContentLoaded", () => {
             <!-- Options will be dynamically loaded -->
           </select>
       
-          <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
+          <Button type="submit" className="bg-[#006f9a] text-white px-4 py-2 rounded-lg hover:cursor-pointer">
             Create Job
-          </button>
+          </Button>
         </form>
         <p id="job-message" class="text-green-600 mt-4 hidden"></p>
       </div>
 
       <!-- Job List -->
-      <div id="job-list" class="space-y-6 mt-10 section hidden">
+      <div id="job-list" class="space-y-6 mt-10 bg-white p-6 rounded-lg shadow-md section hidden">
         <h2 class="text-2xl font-bold mb-4">Job List</h2>
         <ul id="job-list-container"></ul>
       </div>
 
       <!-- Job Settings Section -->
-      <div id="job-settings" class="space-y-6 mt-10 section hidden">
+      <div id="job-settings" class="space-y-6 mt-10 bg-white p-6 rounded-lg shadow-md section hidden">
         <h2 class="text-2xl font-bold mb-4">Job Settings</h2>
         <table id="job-settings-table" class="min-w-full table-auto border-collapse">
           <thead>

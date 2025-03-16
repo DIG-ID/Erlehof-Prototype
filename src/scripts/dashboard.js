@@ -30,30 +30,32 @@ export function initDashboard() {
     // Function to fetch logged-in user and handle role-based UI logic
     async function fetchUser() {
         const { data: { user }, error } = await supabase.auth.getUser();
-
+    
         if (error || !user) {
             console.error("Not logged in:", error?.message);
             window.location.href = "/login";
             return;
         }
-
+    
         try {
             const { data: userData, error: userError } = await supabase
                 .from("users")
-                .select("id, email, role_id")
+                .select("id, username, email, role_id") // Fetch username
                 .eq("id", user.id)
                 .single();
-
+    
             if (userError) {
                 console.error("Error fetching user profile:", userError.message);
             } else {
-                document.getElementById("user-info").textContent = `Logged in as: ${user.email}`;
-
+                document.querySelectorAll('.user-info').forEach(userInfoElement => {
+                    userInfoElement.textContent = `Logged in as: ${userData.username || user.email}`;
+                });
+    
                 // Show or hide menu items based on role
                 const userListLink = document.querySelector('a[data-target="user-list"]');
                 const createJobLink = document.querySelector('a[data-target="create-job"]');
                 const jobSettingsLink = document.querySelector('a[data-target="job-settings"]');
-
+    
                 // Show user list and job creation only for superadmins (role_id = 1) and admins (role_id = 2)
                 if (userData?.role_id === 1 || userData?.role_id === 2) {
                     userListLink.closest("li").classList.remove("hidden"); // Show User List
@@ -67,12 +69,12 @@ export function initDashboard() {
                     jobSettingsLink.closest("li").classList.add("hidden");
                     document.getElementById("user-list").classList.add("hidden"); // Hide user list for non-admin users
                 }
-
+    
                 // Allow job creation only for superadmins (role_id = 1)
                 if (userData?.role_id !== 1) {
                     document.getElementById("job-form").classList.add("hidden");
                 }
-
+    
                 // Fetch and display jobs for the logged-in user
                 fetchJobs(userData.role_id);
             }
@@ -80,6 +82,7 @@ export function initDashboard() {
             console.error("Error fetching user role:", err);
         }
     }
+    
 
     // Fetch roles
     async function loadRoles() {
@@ -291,23 +294,23 @@ export function initDashboard() {
                                     <p class="text-gray-600">${job.description}</p>
                                 </div>
                                 <div class="flex space-x-2">
-                                    <button 
-                                        class="removeButton text-red-500 hover:text-red-700 hover:cursor-pointer"
-                                        data-job-id="${job.id}"
-                                    >
-                                        ❌ 
-                                    </button>
                                     ${job.status === "open"
                                         ? (allowedRoles.includes(userData.role_id)
                                             ? `<button 
-                                                    class="acceptButton bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 hover:cursor-pointer"
+                                                    class="acceptButton bg-green-500 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-green-700 hover:cursor-pointer"
                                                     data-job-id="${job.id}"
                                                 >
                                                     Accept
                                                 </button>` 
-                                            : `<span class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:cursor-default">Open</span>`)
-                                        : `<span class="bg-red-500 text-white px-4 py-2 rounded-lg hover:cursor-default">Assigned</span>`
+                                            : `<span class="bg-gray-500 text-white px-4 text-sm font-medium py-2 rounded-lg hover:cursor-default">Open</span>`)
+                                        : `<span class="bg-[#006f9a] text-white px-4 py-2 text-sm font-medium rounded-lg hover:cursor-default">Assigned</span>`
                                     }
+                                    <button 
+                                        class="removeButton hidden bg-red-700 text-white px-4 py-2 text-sm rounded-lg font-medium hover:cursor-pointer"
+                                        data-job-id="${job.id}"
+                                    >
+                                        Delete
+                                    </button>
                                 </div>
                             </li>
                         `;
@@ -394,8 +397,8 @@ export function initDashboard() {
                     <td class="border p-2">${acceptedUser}</td>
                     <td class="border p-2">${new Date(job.created_at).toLocaleString()}</td>
                     <td class="border p-2">
-                        <button class="edit-btn bg-blue-500 text-white px-2 py-1 rounded" data-id="${job.id}">Edit</button>
-                        <button class="delete-btn bg-red-500 text-white px-2 py-1 rounded ml-2" data-id="${job.id}">Delete</button>
+                        <button class="edit-btn bg-[#006f9a] text-white px-2 py-1 rounded" data-id="${job.id}">Edit</button>
+                        <button class="delete-btn bg-red-700 text-white px-2 py-1 rounded ml-2" data-id="${job.id}">Delete</button>
                     </td>
                 `;
     
