@@ -24,8 +24,8 @@ export function initDashboard() {
                             <td class="border p-2">${user.email}</td>
                             <td class="border p-2">${user.roles ? user.roles.role_name : "Unknown"}</td>
                             <td class="border p-2">
-                                <button class="bg-blue-500 text-white px-4 py-1 rounded edit-user" data-id="${user.id}">Edit</button>
-                                <button class="bg-red-500 text-white px-4 py-1 rounded delete-user" data-id="${user.id}">Delete</button>
+                                <button class="bg-[#006f9a] text-white px-4 py-1 rounded edit-user" data-id="${user.id}">Edit</button>
+                                <button class="bg-red-700 text-white px-4 py-1 rounded delete-user" data-id="${user.id}">Delete</button>
                             </td>
                         </tr>
                     `)
