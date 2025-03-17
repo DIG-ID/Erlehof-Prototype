@@ -83,10 +83,23 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
 
       <!-- User List -->
-      <div id="user-list" class="space-y-6 mt-10 section hidden">
+      <div id="user-list" class="space-y-6 mt-10 bg-white p-6 rounded-lg shadow-md section hidden">
         <h2 class="text-2xl font-bold mb-4">User List</h2>
-        <ul id="user-list-container"></ul>
+        <table id="user-table" class="min-w-full table-auto border-collapse">
+            <thead>
+                <tr class="text-left">
+                    <th class="border p-2">Username</th>
+                    <th class="border p-2">Email</th>
+                    <th class="border p-2">Role</th>
+                    <th class="border p-2">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="user-table-body">
+                <!-- User rows will be inserted dynamically -->
+            </tbody>
+        </table>
       </div>
+
 
       <!-- Create Job Form -->
       <div id="create-job" class="bg-white p-6 rounded-lg shadow-md section hidden">

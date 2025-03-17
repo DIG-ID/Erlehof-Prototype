@@ -6,26 +6,81 @@ export function initDashboard() {
         try {
             const { data, error } = await supabase
                 .from("users")
-                .select("id, email, role_id")
+                .select("id, email, role_id, username, roles(role_name)") // Join with roles table
                 .neq("role_id", 1); // Exclude superadmins
-
+    
             if (error) {
                 console.error("Error fetching users:", error.message);
                 return;
             }
-
-            const userListContainer = document.getElementById("user-list-container");
-
+    
+            const userTableBody = document.getElementById("user-table-body");
+    
             if (data && Array.isArray(data)) {
-                // Display user information elsewhere on the page if needed
-                userListContainer.innerHTML = data
-                    .map(user => `<li class="text-lg text-gray-800">ID: ${user.id}, Email: ${user.email} (Role: ${user.role_id})</li>`)
+                userTableBody.innerHTML = data
+                    .map(user => `
+                        <tr class="border-b">
+                            <td class="border p-2">${user.username || "N/A"}</td>
+                            <td class="border p-2">${user.email}</td>
+                            <td class="border p-2">${user.roles ? user.roles.role_name : "Unknown"}</td>
+                            <td class="border p-2">
+                                <button class="bg-blue-500 text-white px-4 py-1 rounded edit-user" data-id="${user.id}">Edit</button>
+                                <button class="bg-red-500 text-white px-4 py-1 rounded delete-user" data-id="${user.id}">Delete</button>
+                            </td>
+                        </tr>
+                    `)
                     .join("");
+    
+                // Attach event listeners to the delete buttons
+                attachDeleteUserListeners();
             }
         } catch (err) {
             console.error("Unexpected error fetching users:", err);
         }
     }
+    
+    // Function to delete users
+    async function deleteUser(userId) {
+        if (!confirm("Are you sure you want to delete this user?")) {
+            return;
+        }
+    
+        try {
+            // Step 1: Update or delete related jobs
+            await supabase
+                .from("jobs")
+                .update({ accepted_by: null }) // Or use .delete() if you want to remove them
+                .eq("accepted_by", userId);
+    
+            // Step 2: Delete the user
+            const { error } = await supabase
+                .from("users")
+                .delete()
+                .eq("id", userId);
+    
+            if (error) {
+                console.error("Error deleting user:", error.message);
+                return;
+            }
+    
+            alert("User deleted successfully.");
+            fetchUsers(); // Refresh the user list
+    
+        } catch (err) {
+            console.error("Unexpected error deleting user:", err);
+        }
+    }
+    
+
+    function attachDeleteUserListeners() {
+        document.querySelectorAll(".delete-user").forEach(button => {
+            button.addEventListener("click", function () {
+                const userId = this.getAttribute("data-id");
+                deleteUser(userId);
+            });
+        });
+    }
+    
 
     // Function to fetch logged-in user and handle role-based UI logic
     async function fetchUser() {
@@ -54,12 +109,14 @@ export function initDashboard() {
                 // Show or hide menu items based on role
                 const userListLink = document.querySelector('a[data-target="user-list"]');
                 const createJobLink = document.querySelector('a[data-target="create-job"]');
+                const jobListLink = document.querySelector('a[data-target="job-list"]');
                 const jobSettingsLink = document.querySelector('a[data-target="job-settings"]');
     
                 // Show user list and job creation only for superadmins (role_id = 1) and admins (role_id = 2)
                 if (userData?.role_id === 1 || userData?.role_id === 2) {
                     userListLink.closest("li").classList.remove("hidden"); // Show User List
                     createJobLink.closest("li").classList.remove("hidden"); // Show Create Job
+                    jobListLink.closest("li").classList.add("hidden");
                     jobSettingsLink.closest("li").classList.remove("hidden");
                     fetchUsers(); // Show the user list if superadmin or admin
                     document.getElementById("user-list").classList.remove("hidden");
@@ -84,7 +141,7 @@ export function initDashboard() {
     }
     
 
-    // Fetch roles
+    // Fetch roles and filter out Superadmin (1) and Admin (2)
     async function loadRoles() {
         try {
             const { data: roles, error } = await supabase
@@ -107,7 +164,10 @@ export function initDashboard() {
             defaultOption.textContent = 'Select a role';
             selectElement.appendChild(defaultOption);
 
-            roles.forEach(role => {
+            // Filter out Superadmin (1) and Admin (2)
+            const filteredRoles = roles.filter(role => role.id > 2);
+
+            filteredRoles.forEach(role => {
                 const option = document.createElement("option");
                 option.value = role.id;
                 option.textContent = role.role_name;
@@ -117,6 +177,9 @@ export function initDashboard() {
             console.error("Error fetching roles:", err);
         }
     }
+
+    
+
 
     // Job creation function
     async function createJob(event) {
@@ -465,10 +528,11 @@ export function initDashboard() {
     }
 
     // Initialize the dashboard
+    document.addEventListener("DOMContentLoaded", fetchUsers);
     fetchUser();
     loadRoles();
     fetchJobSettings();
-
+    document.addEventListener("DOMContentLoaded", loadRoles);
     // Set up event listeners
     document.getElementById("logout-btn").addEventListener("click", logout);
     document.getElementById("job-form").addEventListener("submit", createJob);
